@@ -1,0 +1,30 @@
+---
+- hosts: drb
+  
+  vars_files:
+    - vars.yml
+
+  roles:
+    - digital-rebar
+
+  pre_tasks:
+    - name: Install required packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - unzip
+        - libcap2-bin
+
+    - name: Create /usr/share/dr-provision
+      file:
+        path: /usr/share/dr-provision
+        state: directory
+
+  post_tasks:
+    - name: Set capabilities on dr-provision binary
+      capabilities:
+        path: "{{ digital_rebar_binary }}"
+        capability: cap_net_bind_service,cap_net_raw+ep
+        state: present
+      notify: restart dr-provision
