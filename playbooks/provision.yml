@@ -4,6 +4,18 @@
   vars_files:
     - vars.yml
 
+  handlers:
+    - name: Update GRUB
+      command: update-grub
+      listen: update-grub
+      failed_when: ('error' in grub_register_update.stderr)
+      register: grub_register_update
+
+
+    - name: Save iptables rules
+      shell: iptables-save > /etc/iptables/rules.v4
+      listen: persist-iptables
+
   roles:
     - digital-rebar
 
@@ -34,14 +46,14 @@
       iptables:
         table: nat
         chain: POSTROUTING
-        out_interface: enp0s8
+        out_interface: enp0s3
         jump: MASQUERADE
       notify: persist-iptables
 
 
     - name: Allow internal traffic to the outside
       iptables:
-        table: FORWARD
+        chain: FORWARD
         in_interface: enp0s8
         out_interface: enp0s3
         jump: ACCEPT
@@ -50,7 +62,7 @@
 
     - name: Allow related traffic from the outside back in
       iptables:
-        table: FORWARD
+        chain: FORWARD
         in_interface: enp0s3
         out_interface: enp0s8
         ctstate: ESTABLISHED,RELATED
@@ -64,7 +76,6 @@
     #     regexp: '^GRUB_CMDLINE_LINUX='
     #     line: 'GRUB_CMDLINE_LINUX="debian-installer=en_US.UTF-8 net.ifnames=0 biosdevname=0"'
     #   notify: update-grub
-
 
   post_tasks:
     - name: Set capabilities on dr-provision binary
