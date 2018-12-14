@@ -83,4 +83,3 @@
         path: "{{ digital_rebar_binary }}"
         capability: cap_net_bind_service,cap_net_raw+ep
         state: present
-      notify: restart dr-provision

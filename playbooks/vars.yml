@@ -7,7 +7,8 @@ digital_rebar_install_dir: /usr/local/bin
 digital_rebar_binary: "{{ digital_rebar_install_dir }}/dr-provision"
 digital_rebar_sha256: 95ec889837d16de23295d58815528349c7ac801e3c691ebf1f346de47168e422
 
-digital_rebar_config:
+digital_rebar_config: []
+
   # sections:
   #   bootenvs:
   #     centos-7-install:
