@@ -15,6 +15,7 @@
       with_items:
         - unzip
         - libcap2-bin
+        - iptables-persistent
 
     - name: Create /usr/share/dr-provision
       file:
@@ -35,6 +36,7 @@
         chain: POSTROUTING
         out_interface: enp0s8
         jump: MASQUERADE
+      notify: persist-iptables
 
 
     - name: Allow internal traffic to the outside
@@ -43,6 +45,7 @@
         in_interface: enp0s8
         out_interface: enp0s3
         jump: ACCEPT
+      notify: persist-iptables
 
 
     - name: Allow related traffic from the outside back in
@@ -51,7 +54,8 @@
         in_interface: enp0s3
         out_interface: enp0s8
         ctstate: ESTABLISHED,RELATED
-        jump: ACCEPT    
+        jump: ACCEPT
+      notify: persist-iptables
 
 
     # - name: Set GRUB kernel boot params
@@ -60,6 +64,7 @@
     #     regexp: '^GRUB_CMDLINE_LINUX='
     #     line: 'GRUB_CMDLINE_LINUX="debian-installer=en_US.UTF-8 net.ifnames=0 biosdevname=0"'
     #   notify: update-grub
+
 
   post_tasks:
     - name: Set capabilities on dr-provision binary
