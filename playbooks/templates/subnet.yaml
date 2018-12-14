@@ -1,0 +1,27 @@
+{
+  "Name": "local_subnet",
+  "Subnet": "192.168.33.0/24",
+  "ActiveStart": "192.168.33.100",
+  "ActiveEnd": "192.168.33.199",
+  "ActiveLeaseTime": 60,
+  "Enabled": true,
+  "ReservedLeaseTime": 7200,
+  "Strategy": "MAC",
+  "Options": [
+    {
+      "Code": 3,
+      "Value": "192.168.33.10",
+      "Description": "Default Gateway"
+    },
+    {
+      "Code": 6,
+      "Value": "192.168.33.10",
+      "Description": "DNS Servers"
+    },
+    {
+      "Code": 15,
+      "Value": "k8s.test-secman",
+      "Description": "Domain Name"
+    }
+  ]
+}

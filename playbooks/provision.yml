@@ -5,13 +5,6 @@
     - vars.yml
 
   handlers:
-    - name: Update GRUB
-      command: update-grub
-      listen: update-grub
-      failed_when: ('error' in grub_register_update.stderr)
-      register: grub_register_update
-
-
     - name: Save iptables rules
       shell: iptables-save > /etc/iptables/rules.v4
       listen: persist-iptables
@@ -28,6 +21,37 @@
         - unzip
         - libcap2-bin
         - iptables-persistent
+        - jq
+
+
+    - name: Install DNS Proxy
+      apt:
+        name: dnsproxy
+        state: present
+      ignore_errors: yes # Install fails because it can't start without proper config
+
+
+    - name: Get (first) DNS server
+      shell: cat /etc/resolv.conf |grep nameserver | head -n1 | cut -d ' ' -f2
+      register: resolv_dns_ip
+
+
+    - set_fact:
+        dns_ip: "{{ resolv_dns_ip.stdout }}"
+
+
+    - name: Create dnsproxy config
+      template:
+        src: dnsproxy.conf
+        dest: /etc/dnsproxy.conf
+
+
+    - name: Start dnsproxy
+      service:
+        name: dnsproxy
+        enabled: true
+        state: started
+
 
     - name: Create /usr/share/dr-provision
       file:
@@ -69,17 +93,92 @@
         jump: ACCEPT
       notify: persist-iptables
 
-
-    # - name: Set GRUB kernel boot params
-    #   lineinfile:
-    #     path: /etc/default/grub
-    #     regexp: '^GRUB_CMDLINE_LINUX='
-    #     line: 'GRUB_CMDLINE_LINUX="debian-installer=en_US.UTF-8 net.ifnames=0 biosdevname=0"'
-    #   notify: update-grub
-
   post_tasks:
     - name: Set capabilities on dr-provision binary
       capabilities:
         path: "{{ digital_rebar_binary }}"
         capability: cap_net_bind_service,cap_net_raw+ep
         state: present
+
+
+    - name: Check if community content already downloaded
+      stat:
+        path: /tmp/drp-community-content
+      register: community_content
+
+
+    - name: Download community content
+      get_url:
+        url: "{{ item }}"
+        dest: /tmp
+      with_items:
+        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/drp-community-contrib
+        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/drp-community-content
+        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/ansible
+        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/classify
+      when: not community_content.stat.exists
+
+
+    - name: Install community content
+      shell: "drpcli contents upload {{ item }}"
+      with_items:
+        - /tmp/drp-community-contrib
+        - /tmp/drp-community-content
+        - /tmp/ansible
+        - /tmp/classify
+      when: not community_content.stat.exists
+
+    
+    - name: Check if subnet exists
+      shell: drpcli subnets show local_subnet
+      register: local_subnet
+      ignore_errors: yes
+      no_log: True
+
+
+    - name: Create subnet template
+      template:
+        src: subnet.yaml
+        dest: /tmp/subnet.yaml
+      when: local_subnet.rc != 0
+
+
+    - name: Create local subnet from template
+      shell: drpcli subnets create /tmp/subnet.yaml
+      when: local_subnet.rc != 0
+
+
+    - name: Detect if discovery bootenv ISO is missing
+      shell: drpcli bootenvs list | jq -r '.[] | select( .Errors[] | contains("Explode ISO")) | .Name' | grep discovery
+      register: discovery_bootenv
+      ignore_errors: yes
+      no_log: True
+
+
+    - name: UploadISO for Discovery BootEnv
+      shell: drpcli bootenvs uploadiso sledgehammer
+      when: discovery_bootenv.rc == 0
+
+
+    - name: Detect discovery workflow
+      shell: drpcli workflows list | jq -r '.[] | select( .Name == "discovery") | .Name' | grep discovery
+      register: discovery_workflow
+      ignore_errors: yes
+      no_log: True
+
+
+    - name: Create discovery workflow
+      shell: "drpcli workflows create '{ \"Name\": \"discovery\", \"Stages\": [ \"discover\", \"sledgehammer-wait\" ] }'"
+      when: discovery_workflow.rc != 0
+
+
+    - name: Detect default Workflow
+      shell: drpcli prefs list | grep defaultWorkflow
+      register: default_workflow
+      ignore_errors: yes
+      no_log: True
+
+
+    - name: Set default Workflow
+      shell: drpcli prefs set defaultWorkflow discovery unknownBootEnv discovery defaultBootEnv sledgehammer defaultStage discover
+      when: default_workflow.rc != 0
