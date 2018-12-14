@@ -21,6 +21,39 @@
         path: /usr/share/dr-provision
         state: directory
 
+    
+    - name: Enable IPv4 forwarding
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: 1
+        sysctl_set: yes
+
+
+    - name: Set IP Masquerade
+      iptables:
+        table: nat
+        chain: POSTROUTING
+        out_interface: enp0s8
+        jump: MASQUERADE
+
+
+    - name: Allow internal traffic to the outside
+      iptables:
+        table: FORWARD
+        in_interface: enp0s8
+        out_interface: enp0s3
+        jump: ACCEPT
+
+
+    - name: Allow related traffic from the outside back in
+      iptables:
+        table: FORWARD
+        in_interface: enp0s3
+        out_interface: enp0s8
+        ctstate: ESTABLISHED,RELATED
+        jump: ACCEPT    
+
+
   post_tasks:
     - name: Set capabilities on dr-provision binary
       capabilities:

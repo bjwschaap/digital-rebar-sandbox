@@ -8,8 +8,8 @@ Vagrant.configure("2") do |config|
   config.ssh.insert_key = false
 
   boxes = [
-    { :name => 'drb', :memory => 2048, :cpus => 1, :gui => false, :ip => "192.168.33.10" },
-    { :name => 'cl1', :memory => 1024, :cpus => 1, :gui => false, :ip => "192.168.33.11" }
+    { :name => 'drb', :memory => 2048, :cpus => 1, :gui => false, :ip => "192.168.33.10" }
+    #{ :name => 'cl1', :memory => 1024, :cpus => 1, :gui => false, :ip => "192.168.33.11" }
   ]
 
   boxes.each do |opts|
