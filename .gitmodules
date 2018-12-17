@@ -1,3 +1,0 @@
-[submodule "playbooks/roles/digital-rebar"]
-	path = playbooks/roles/digital-rebar
-	url = https://github.com/mrlesmithjr/ansible-digital-rebar.git
