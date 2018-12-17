@@ -116,6 +116,8 @@
         - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/drp-community-content
         - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/ansible
         - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/classify
+        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/task-library
+        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/krib
       when: not community_content.stat.exists
 
 
@@ -126,6 +128,8 @@
         - /tmp/drp-community-content
         - /tmp/ansible
         - /tmp/classify
+        - /tmp/task-library
+        - /tmp/krib
       when: not community_content.stat.exists
 
     
