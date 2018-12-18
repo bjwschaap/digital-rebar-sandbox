@@ -15,13 +15,12 @@
   pre_tasks:
     - name: Install required packages
       apt:
-        name: "{{ item }}"
+        name:
+          - unzip
+          - libcap2-bin
+          - iptables-persistent
+          - jq
         state: present
-      with_items:
-        - unzip
-        - libcap2-bin
-        - iptables-persistent
-        - jq
 
 
     - name: Install DNS Proxy
@@ -166,14 +165,14 @@
 
     - name: Detect if debian-9-install BootEnv ISO is missing
       shell: drpcli isos list | jq -r .[] | grep 'debian-9'
-      register: debian-9_bootenv
+      register: debian9_bootenv
       ignore_errors: yes
       no_log: True
 
 
     - name: UploadISO for Debian 9 BootEnv
       shell: drpcli bootenvs uploadiso debian-9-install
-      when: debian-9_bootenv.rc != 0
+      when: debian9_bootenv.rc != 0
 
 
     - name: Detect discovery workflow
