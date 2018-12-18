@@ -109,12 +109,12 @@
     - name: Download community content
       get_url:
         url:
-          - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/drp-community-contrib?version={{ digital_rebar_content_version }}
-          - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/drp-community-content?version={{ digital_rebar_content_version }}
-          - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/ansible?version={{ digital_rebar_content_version }}
-          - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/classify?version={{ digital_rebar_content_version }}
-          - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/task-library?version={{ digital_rebar_content_version }}
-          - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/krib?version={{ digital_rebar_content_version }}
+          - "{{ digital_rebar_content_catalog_url }}/drp-community-contrib?version={{ digital_rebar_content_version }}"
+          - "{{ digital_rebar_content_catalog_url }}/drp-community-content?version={{ digital_rebar_content_version }}"
+          - "{{ digital_rebar_content_catalog_url }}/ansible?version={{ digital_rebar_content_version }}"
+          - "{{ digital_rebar_content_catalog_url }}/classify?version={{ digital_rebar_content_version }}"
+          - "{{ digital_rebar_content_catalog_url }}/task-library?version={{ digital_rebar_content_version }}"
+          - "{{ digital_rebar_content_catalog_url }}/krib?version={{ digital_rebar_content_version }}"
         dest: /tmp
       when: not community_content.stat.exists
 
@@ -150,16 +150,30 @@
       when: local_subnet.rc != 0
 
 
-    - name: Detect if Discovery bootenv ISO is missing
-      shell: drpcli isos list | jq -r .[] | grep sledgehammer
-      register: discovery_bootenv
-      ignore_errors: yes
-      no_log: True
+    - name: Count known discovery bootenv ISOs
+      shell: drpcli bootenvs show discovery | jq -r .OS.SupportedArchitectures[].IsoFile | wc -l
+      register: discovery_bootenv_isos
 
 
+    - name: Known discovery bootenv ISOs (architectures)
+      debug: msg="{{discovery_bootenv_isos.stdout}}"
+
+
+    - name: Count discovery bootenv ISOs already uploaded
+      shell: drpcli isos list | grep sledgehammer | wc -l
+      register: discovery_isos_uploaded
+
+
+    - name: Already uploaded bootenv ISOs
+      debug: msg="{{discovery_isos_uploaded.stdout}}"
+
+
+    # For some reason uploadiso only downloads one ISO each time it's called
+    # so we need to execute one time for each supported architecture.
     - name: UploadISO for Discovery BootEnv
       shell: drpcli bootenvs uploadiso sledgehammer
-      when: discovery_bootenv.rc != 0
+      when: discovery_bootenv_isos.stdout != discovery_isos_uploaded.stdout
+      loop: "{{ range(discovery_bootenv_isos.stdout|int - discovery_isos_uploaded.stdout|int)|list }}"
 
 
     - name: Detect if debian-9-install BootEnv ISO is missing
@@ -196,3 +210,31 @@
     - name: Set default Workflow
       shell: drpcli prefs set defaultWorkflow discovery unknownBootEnv discovery defaultBootEnv sledgehammer defaultStage discover
       when: default_workflow.rc != 0
+
+
+    # Certs plugin provider is needed for KRIB
+    - name: Determine if certs plugin provider is installed
+      shell: drpcli plugin_providers list | jq -r .[].Name | grep certs
+      register: certs_plugin_provider
+      ignore_errors: yes
+      no_log: True
+
+
+    - when: certs_plugin_provider.rc != 0
+      block:
+      - name: Get certs plugin_provider download url
+        shell: "curl -s {{ digital_rebar_plugin_catalog_url }}/certs?version={{ digital_rebar_certs_plugin_provider_version }} | jq -r '(.base)+(.amd64.linux)'"
+        args:
+          warn: false
+        register: certs_url
+
+      - name: Download URL for certs plugin provider
+        debug: msg="{{certs_url.stdout}}"
+
+      - name: Download certs plugin provider
+        get_url:
+          url: "{{ certs_url.stdout }}"
+          dest: /tmp
+
+      - name: Install certs plugin provider
+        shell: drpcli plugin_providers upload certs from /tmp/certs
