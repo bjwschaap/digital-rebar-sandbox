@@ -108,15 +108,14 @@
 
     - name: Download community content
       get_url:
-        url: "{{ item }}"
+        url:
+          - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/drp-community-contrib?version={{ digital_rebar_content_version }}
+          - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/drp-community-content?version={{ digital_rebar_content_version }}
+          - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/ansible?version={{ digital_rebar_content_version }}
+          - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/classify?version={{ digital_rebar_content_version }}
+          - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/task-library?version={{ digital_rebar_content_version }}
+          - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/krib?version={{ digital_rebar_content_version }}
         dest: /tmp
-      with_items:
-        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/drp-community-contrib?version={{ digital_rebar_content_version }}
-        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/drp-community-content?version={{ digital_rebar_content_version }}
-        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/ansible?version={{ digital_rebar_content_version }}
-        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/classify?version={{ digital_rebar_content_version }}
-        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/task-library?version={{ digital_rebar_content_version }}
-        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/krib?version={{ digital_rebar_content_version }}
       when: not community_content.stat.exists
 
 
