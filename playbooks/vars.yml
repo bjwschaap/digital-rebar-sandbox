@@ -1,11 +1,12 @@
 ---
 digital_rebar_package: dr-provision.zip
-digital_rebar_version: v3.11.0
+digital_rebar_version: v3.12.0
 digital_rebar_dl_url: https://github.com/digitalrebar/provision/releases/download
 digital_rebar_dl: "{{ digital_rebar_dl_url }}/{{ digital_rebar_version }}/{{ digital_rebar_package }}"
 digital_rebar_install_dir: /usr/local/bin
 digital_rebar_binary: "{{ digital_rebar_install_dir }}/dr-provision"
-digital_rebar_sha256: 95ec889837d16de23295d58815528349c7ac801e3c691ebf1f346de47168e422
+digital_rebar_sha256: caec60479cb53a7ac6966cdcefa5651f02ae37b28d25dba57018439c55bebce4
+digital_rebar_content_version: v1.12.0
 
 digital_rebar_config: []
 

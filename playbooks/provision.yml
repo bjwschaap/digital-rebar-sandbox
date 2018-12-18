@@ -112,12 +112,12 @@
         url: "{{ item }}"
         dest: /tmp
       with_items:
-        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/drp-community-contrib
-        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/drp-community-content
-        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/ansible
-        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/classify
-        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/task-library
-        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/krib
+        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/drp-community-contrib?version={{ digital_rebar_content_version }}
+        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/drp-community-content?version={{ digital_rebar_content_version }}
+        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/ansible?version={{ digital_rebar_content_version }}
+        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/classify?version={{ digital_rebar_content_version }}
+        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/task-library?version={{ digital_rebar_content_version }}
+        - https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog/content/krib?version={{ digital_rebar_content_version }}
       when: not community_content.stat.exists
 
 
@@ -152,8 +152,8 @@
       when: local_subnet.rc != 0
 
 
-    - name: Detect if discovery bootenv ISO is missing
-      shell: drpcli bootenvs list | jq -r '.[] | select( .Errors[] | contains("Explode ISO")) | .Name' | grep discovery
+    - name: Detect if Discovery bootenv ISO is missing
+      shell: drpcli isos list | jq -r .[] | grep sledgehammer
       register: discovery_bootenv
       ignore_errors: yes
       no_log: True
@@ -161,7 +161,19 @@
 
     - name: UploadISO for Discovery BootEnv
       shell: drpcli bootenvs uploadiso sledgehammer
-      when: discovery_bootenv.rc == 0
+      when: discovery_bootenv.rc != 0
+
+
+    - name: Detect if debian-9-install BootEnv ISO is missing
+      shell: drpcli isos list | jq -r .[] | grep 'debian-9'
+      register: debian-9_bootenv
+      ignore_errors: yes
+      no_log: True
+
+
+    - name: UploadISO for Debian 9 BootEnv
+      shell: drpcli bootenvs uploadiso debian-9-install
+      when: debian-9_bootenv.rc != 0
 
 
     - name: Detect discovery workflow
