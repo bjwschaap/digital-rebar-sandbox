@@ -108,14 +108,15 @@
 
     - name: Download community content
       get_url:
-        url:
-          - "{{ digital_rebar_content_catalog_url }}/drp-community-contrib?version={{ digital_rebar_content_version }}"
-          - "{{ digital_rebar_content_catalog_url }}/drp-community-content?version={{ digital_rebar_content_version }}"
-          - "{{ digital_rebar_content_catalog_url }}/ansible?version={{ digital_rebar_content_version }}"
-          - "{{ digital_rebar_content_catalog_url }}/classify?version={{ digital_rebar_content_version }}"
-          - "{{ digital_rebar_content_catalog_url }}/task-library?version={{ digital_rebar_content_version }}"
-          - "{{ digital_rebar_content_catalog_url }}/krib?version={{ digital_rebar_content_version }}"
+        url: "{{ item }}"
         dest: /tmp
+      with_items:
+        - "{{ digital_rebar_content_catalog_url }}/drp-community-contrib?version={{ digital_rebar_content_version }}"
+        - "{{ digital_rebar_content_catalog_url }}/drp-community-content?version={{ digital_rebar_content_version }}"
+        - "{{ digital_rebar_content_catalog_url }}/ansible?version={{ digital_rebar_content_version }}"
+        - "{{ digital_rebar_content_catalog_url }}/classify?version={{ digital_rebar_content_version }}"
+        - "{{ digital_rebar_content_catalog_url }}/task-library?version={{ digital_rebar_content_version }}"
+        - "{{ digital_rebar_content_catalog_url }}/krib?version={{ digital_rebar_content_version }}"
       when: not community_content.stat.exists
 
 
