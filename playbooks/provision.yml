@@ -231,9 +231,6 @@
           warn: false
         register: certs_url
 
-      - name: Download URL for certs plugin provider
-        debug: msg="{{certs_url.stdout}}"
-
       - name: Download certs plugin provider
         get_url:
           url: "{{ certs_url.stdout }}"
