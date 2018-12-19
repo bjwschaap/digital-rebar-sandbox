@@ -1,6 +1,8 @@
 ---
 digital_rebar_package: dr-provision.zip
 digital_rebar_version: v3.12.0
+digital_rebar_content_version: v1.12.0
+digital_rebar_certs_plugin_provider_version: v2.6.0
 digital_rebar_dl_url: https://github.com/digitalrebar/provision/releases/download
 digital_rebar_dl: "{{ digital_rebar_dl_url }}/{{ digital_rebar_version }}/{{ digital_rebar_package }}"
 digital_rebar_install_dir: /usr/local/bin
@@ -9,8 +11,6 @@ digital_rebar_sha256: caec60479cb53a7ac6966cdcefa5651f02ae37b28d25dba57018439c55
 digital_rebar_catalog_base_url: https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/catalog
 digital_rebar_content_catalog_url: "{{ digital_rebar_catalog_base_url }}/content"
 digital_rebar_plugin_catalog_url: "{{ digital_rebar_catalog_base_url }}/plugins"
-digital_rebar_content_version: v1.12.0
-digital_rebar_certs_plugin_provider_version: v2.6.0
 
 digital_rebar_config: []
 
