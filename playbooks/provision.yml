@@ -116,6 +116,7 @@
         - "{{ digital_rebar_content_catalog_url }}/ansible?version={{ digital_rebar_content_version }}"
         - "{{ digital_rebar_content_catalog_url }}/classify?version={{ digital_rebar_content_version }}"
         - "{{ digital_rebar_content_catalog_url }}/task-library?version={{ digital_rebar_content_version }}"
+        - "{{ digital_rebar_content_catalog_url }}/dev-library?version={{ digital_rebar_content_version }}"
         - "{{ digital_rebar_content_catalog_url }}/krib?version={{ digital_rebar_content_version }}"
       when: not community_content.stat.exists
 
@@ -128,6 +129,7 @@
         - /tmp/ansible
         - /tmp/classify
         - /tmp/task-library
+        - /tmp/dev-library
         - /tmp/krib
       when: not community_content.stat.exists
 
