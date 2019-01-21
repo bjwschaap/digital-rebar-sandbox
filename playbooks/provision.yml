@@ -118,6 +118,7 @@
         - "{{ digital_rebar_content_catalog_url }}/task-library?version={{ digital_rebar_content_version }}"
         - "{{ digital_rebar_content_catalog_url }}/dev-library?version={{ digital_rebar_content_version }}"
         - "{{ digital_rebar_content_catalog_url }}/krib?version={{ digital_rebar_content_version }}"
+        - "{{ digital_rebar_content_catalog_url }}/coreos?version={{ digital_rebar_content_version }}"
       when: not community_content.stat.exists
 
 
@@ -131,6 +132,7 @@
         - /tmp/task-library
         - /tmp/dev-library
         - /tmp/krib
+        - /tmp/coreos
       when: not community_content.stat.exists
 
     
